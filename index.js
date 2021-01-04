@@ -17,8 +17,22 @@ const router = require('./routes')
 app.use(router)
 app.use(cors())
 
+const { addUser } = require('./functions/users')
+
 io.on('connection', socket => { 
-  console.log('new connection established')  
+  console.log('new connection established')
+  
+  socket.on('joinRoom', (receivedUser, callback) => {
+    const { error, user } = addUser(receivedUser)
+
+    if (error)
+      return callback(error)
+
+    socket.join(user.room)
+    console.log('user joined room', user)
+    
+    callback()
+  })
 })
 
 server.listen(PORT, () => {
