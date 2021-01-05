@@ -25,4 +25,14 @@ const createRoom = (user) => {
   return { newUser }
 }
 
-module.exports = { createRoom }
+const confirmRoom = (room) => {
+  const roomStr = room.trim()
+  const existingRoomIndex = rooms.findIndex(room => room.id === roomStr)
+  
+  if (existingRoomIndex === -1) 
+    return { error: 'Room not found' }
+  
+  return { valid: true }
+}
+
+module.exports = { createRoom, confirmRoom }
