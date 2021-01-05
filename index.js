@@ -22,16 +22,18 @@ const { addUser } = require('./functions/users')
 io.on('connection', socket => { 
   console.log('new connection established')
   
-  socket.on('joinRoom', (receivedUser, callback) => {
-    const { error, user } = addUser(receivedUser)
+  socket.on('joinRoom', (user, callback) => {
+    const { error, room } = addUser(user)
 
-    if (error)
-      return callback(error)
+    if (error) {
+      console.log('error', error)
+      return callback({ error })
+    }
 
-    socket.join(user.room)
-    console.log('user joined room', user)
+    socket.join(room)
+    console.log('user joined room', room)
     
-    callback()
+    callback({ room })
   })
 })
 

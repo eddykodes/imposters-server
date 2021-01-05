@@ -9,7 +9,7 @@ const addUser = (user) => {
 
   users.push(user)
 
-  return { user }
+  return { room: user.room }
 }
 
 module.exports = { addUser }
