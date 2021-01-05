@@ -18,21 +18,29 @@ app.use(router)
 app.use(cors())
 
 const { addUser } = require('./functions/users')
+const { createRoom } = require('./functions/rooms')
 
 io.on('connection', socket => { 
   console.log('new connection established')
   
+  socket.on('createRoom', (user, callback) => {
+    const { error, newUser } = createRoom(user)
+
+    if (error)
+      return callback({ error })
+
+    console.log(newUser.room, 'created')
+    callback({ newUser })
+  })
+
   socket.on('joinRoom', (user, callback) => {
     const { error, room } = addUser(user)
 
-    if (error) {
-      console.log('error', error)
+    if (error) 
       return callback({ error })
-    }
 
     socket.join(room)
-    console.log('user joined room', room)
-    
+    console.log(user.name, 'joined', room)
     callback({ room })
   })
 })
