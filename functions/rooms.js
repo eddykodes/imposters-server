@@ -48,14 +48,19 @@ const addUserToRoom = (user) => {
   return { users: roomData.users }
 }
 
-const getRoomData = (room) => {
-  const roomIndex = rooms.findIndex(r => r.id === room)
+const getRoomData = (user) => {
+  const roomIndex = rooms.findIndex(r => r.id === user.room)
 
   if (roomIndex === -1)
     return { error: 'Room not found' }
   
   const roomData = rooms[roomIndex]
 
+  const userIndex = roomData.users.findIndex(u => u.id === user.id || u.id === user.prevId)
+  
+  if (userIndex === -1) 
+    return { error: 'You are trying to enter the wrong room'}
+  
   return { roomData }
 }
 

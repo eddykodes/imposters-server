@@ -56,16 +56,12 @@ io.on('connection', socket => {
     callback({ room })
   })
 
-  socket.on('getRoomData', (room, callback) => {
-    const { error, roomData } = getRoomData(room)
+  socket.on('getRoomData', (user, callback) => {
+    const { error, roomData } = getRoomData(user)
 
     if (error)
       return callback({ error })
     
-    const user = roomData.users.find(user => user.id === socket.id)
-    if (!user) 
-      return callback({ error: 'You are trying to enter the wrong room'})
-      
     console.log('roomData retrieved by', user.name)
     callback({ roomData })
   })
