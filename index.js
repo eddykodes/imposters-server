@@ -17,8 +17,8 @@ const router = require('./routes')
 app.use(router)
 app.use(cors())
 
-const { addUser } = require('./functions/users')
-const { createRoom, confirmRoom } = require('./functions/rooms')
+const { createUser } = require('./functions/users')
+const { createRoom, confirmRoom, addUserToRoom, getRoomData } = require('./functions/rooms')
 
 io.on('connection', socket => { 
   console.log('new connection established')
@@ -43,14 +43,30 @@ io.on('connection', socket => {
   })
 
   socket.on('joinRoom', (user, callback) => {
-    const { error, room } = addUser(user)
+    const { error, room } = createUser(user)
 
     if (error) 
       return callback({ error })
-
+    
     socket.join(room)
+    addUserToRoom(user)
+    
     console.log(user.name, 'joined', room)
     callback({ room })
+  })
+
+  socket.on('getRoomData', (room, callback) => {
+    const { error, roomData } = getRoomData(room)
+
+    if (error)
+      return callback({ error })
+    
+    const user = roomData.users.find(user => user.id === socket.id)
+    if (!user) 
+      return callback({ error: 'You are trying to enter the wrong room'})
+      
+    console.log('on getRoomData', roomData)
+    callback({ roomData })
   })
 })
 

@@ -19,6 +19,7 @@ const createRoom = (user) => {
     id: roomId,
     leader: newUser,
     started: false,
+    users: [],
   }
 
   rooms.push(room)
@@ -35,4 +36,24 @@ const confirmRoom = (room) => {
   return { valid: true }
 }
 
-module.exports = { createRoom, confirmRoom }
+const addUserToRoom = (user) => {
+  const roomIndex = rooms.findIndex(r => r.id === user.room)
+  const roomData = rooms[roomIndex]
+
+  roomData.users.push(user)
+
+  return { roomData }
+}
+
+const getRoomData = (room) => {
+  const roomIndex = rooms.findIndex(r => r.id === room)
+
+  if (roomIndex === -1)
+    return { error: 'Room not found' }
+  
+  const roomData = rooms[roomIndex]
+
+  return { roomData }
+}
+
+module.exports = { createRoom, confirmRoom, addUserToRoom, getRoomData }

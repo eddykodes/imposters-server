@@ -1,6 +1,6 @@
 const users = []
 
-const addUser = (user) => {
+const createUser = (user) => {
   const existingUser = users.find(u => u.name === user.name && u.room === user.room)
 
   if (existingUser) {
@@ -11,4 +11,4 @@ const addUser = (user) => {
   return { room: user.room }
 }
 
-module.exports = { addUser }
+module.exports = { createUser }
