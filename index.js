@@ -49,8 +49,9 @@ io.on('connection', socket => {
       return callback({ error })
     
     socket.join(room)
-    addUserToRoom(user)
-    
+    const { users } = addUserToRoom(user)
+    io.to(room).emit('userJoin', { users })
+
     console.log(user.name, 'joined', room)
     callback({ room })
   })
@@ -65,7 +66,7 @@ io.on('connection', socket => {
     if (!user) 
       return callback({ error: 'You are trying to enter the wrong room'})
       
-    console.log('on getRoomData', roomData)
+    console.log('roomData retrieved by', user.name)
     callback({ roomData })
   })
 })

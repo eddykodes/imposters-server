@@ -42,7 +42,7 @@ const addUserToRoom = (user) => {
 
   roomData.users.push(user)
 
-  return { roomData }
+  return { users: roomData.users }
 }
 
 const getRoomData = (room) => {
