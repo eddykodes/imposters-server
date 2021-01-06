@@ -40,7 +40,10 @@ const addUserToRoom = (user) => {
   const roomIndex = rooms.findIndex(r => r.id === user.room)
   const roomData = rooms[roomIndex]
 
-  roomData.users.push(user)
+  const existingUser = roomData.users.find(u => u.id === user.id)
+
+  if (!existingUser)
+    roomData.users.push(user)
 
   return { users: roomData.users }
 }
