@@ -14,4 +14,4 @@ const createUser = (user) => {
   return { room: user.room }
 }
 
-module.exports = { createUser }
+module.exports = { users, createUser }

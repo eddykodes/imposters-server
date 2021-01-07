@@ -9,12 +9,14 @@ const options = {
   }
 }
 const io = require('socket.io')(server, options)
+const ejs = require('ejs')
 const cors = require('cors')
 
 const PORT = process.env.PORT || 8000
 
 const router = require('./routes')
 app.use(router)
+app.set('view engine', 'ejs')
 app.use(cors())
 
 const { createUser } = require('./functions/users')

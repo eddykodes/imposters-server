@@ -64,4 +64,4 @@ const getRoomData = (user) => {
   return { roomData }
 }
 
-module.exports = { createRoom, confirmRoom, addUserToRoom, getRoomData }
+module.exports = { rooms, createRoom, confirmRoom, addUserToRoom, getRoomData }
