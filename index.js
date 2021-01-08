@@ -20,7 +20,8 @@ app.set('view engine', 'ejs')
 app.use(cors())
 
 const { createUser } = require('./functions/users')
-const { createRoom, confirmRoom, addUserToRoom, getRoomData } = require('./functions/rooms')
+const { createRoom, confirmRoom, addUserToRoom, getRoomData, setGame } = require('./functions/rooms')
+const { createGame } = require('./functions/games')
 
 io.on('connection', socket => { 
   console.log('new connection established')
@@ -66,6 +67,16 @@ io.on('connection', socket => {
     
     console.log('roomData retrieved by', user.name)
     callback({ roomData })
+  })
+
+  socket.on('startGame', (user, callback) => {
+    const { roomData } = getRoomData(user)
+    const { id, gameData } = createGame(roomData.users)
+    setGame(id, roomData.id)
+
+    console.log('gameData sent', gameData)
+    callback({ gameId: id})
+    io.to(roomData.id).emit('gameData', { gameData })
   })
 })
 

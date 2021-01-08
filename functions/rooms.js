@@ -64,4 +64,11 @@ const getRoomData = (user) => {
   return { roomData }
 }
 
-module.exports = { rooms, createRoom, confirmRoom, addUserToRoom, getRoomData }
+const setGame = (gameId, roomId) => {
+  const roomIndex = rooms.findIndex(r => r.id === roomId)
+  const roomData = rooms[roomIndex]
+  roomData.started = true
+  roomData.gameId = gameId
+}
+
+module.exports = { rooms, createRoom, confirmRoom, addUserToRoom, getRoomData, setGame }
