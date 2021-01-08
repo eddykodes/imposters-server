@@ -63,16 +63,6 @@ const nextPhase = (gameId) => {
     game.phase = game.phase + 1
   }
 
-  const gameData = {
-    phase: game.phase,
-    round: game.round,
-    question: game.rounds[game.round-1].question,
-    target: game.rounds[game.round-1].target,
-    waitingOn: game.users
-  }
-
-  return { gameData }
-
 }
 
 const updateAnswers = (gameId, user, answer) => {
@@ -165,11 +155,20 @@ const calculateScores = (game, votesData) => {
   })
 }
 
-const getScoresData = (gameId) => {
+const getGameData = (gameId) => {
   const game = getGame(gameId)
-  const scoresData = game.users
+  const scoresData = game.users.sort((a, b) => b.score - a.score)
 
-  return scoresData 
+  const gameData = {
+    waitingOn: game.users,
+    phase: game.phase,
+    round: game.round,
+    question: game.rounds[game.round-1].question,
+    target: game.rounds[game.round-1].target,
+    scores: scoresData
+  }
+
+  return { gameData }
 }
 
-module.exports = { games, createGame, nextPhase, updateAnswers, updateVotes, getScoresData }
+module.exports = { games, createGame, nextPhase, updateAnswers, updateVotes, getGameData }
