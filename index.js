@@ -21,7 +21,7 @@ app.use(cors())
 
 const { createUser } = require('./functions/users')
 const { createRoom, confirmRoom, addUserToRoom, getRoomData, setGame } = require('./functions/rooms')
-const { createGame } = require('./functions/games')
+const { createGame, updateAnswers } = require('./functions/games')
 
 io.on('connection', socket => { 
   console.log('new connection established')
@@ -69,14 +69,20 @@ io.on('connection', socket => {
     callback({ roomData })
   })
 
-  socket.on('startGame', (user, callback) => {
+  socket.on('startGame', (user) => {
     const { roomData } = getRoomData(user)
-    const { id, gameData } = createGame(roomData.users)
-    setGame(id, roomData.id)
+    const { gameData } = createGame(roomData.users)
+    setGame(gameData.id, roomData.id)
 
     console.log('gameData sent', gameData)
-    callback({ gameId: id})
     io.to(roomData.id).emit('gameData', { gameData })
+  })
+
+  socket.on('sendAnswer', (gameId, user, answer, callback) => {
+    const { gameData } = updateAnswers(gameId, user, answer)
+    console.log('gameData sent', { gameData })
+    io.to(user.room).emit('gameData', { gameData })
+    callback()
   })
 })
 

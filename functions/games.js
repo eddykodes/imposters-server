@@ -34,6 +34,7 @@ const createGame = (users) => {
   games.push(game)
   
   const gameData = {
+    id,
     rounds: users.length,
     target: targets[game.round-1],
     question: questions[game.round-1],
@@ -42,7 +43,63 @@ const createGame = (users) => {
     phase
   }
 
-  return { id, gameData }
+  return { gameData }
 }
 
-module.exports = { games, createGame }
+const getGame = (gameId) => {
+  const gameIndex = games.findIndex(game => game.id === gameId)
+  const game = games[gameIndex]
+
+  return game
+}
+
+const nextPhase = (gameId) => {
+  const game = getGame(gameId)
+
+  if (game.phase === 4 && game.round !== game.rounds.length) {
+    game.phase = 1
+    game.round = game.round + 1
+  } else {
+    game.phase = game.phase + 1
+  }
+}
+
+const updateAnswers = (gameId, user, answer) => {
+  const game = getGame(gameId)
+  const roundAnswers = game.rounds[game.round-1].answers
+
+  const answerEntry = {
+    id: roundAnswers.length,
+    user,
+    answer,
+  }
+  roundAnswers.push(answerEntry)
+  
+  const answerData = roundAnswers.map(answer => answer.answer)
+
+  let waitingOn
+  if (roundAnswers.length === game.users.length) {
+    waitingOn = game.users
+    nextPhase(gameId)
+  } else {
+    waitingOn = game.users.filter(user => {
+      let found = false
+      roundAnswers.forEach(answer => {
+        if (answer.user.name === user.name)
+          return found = true
+      })
+      return !found
+    })
+  }
+  
+  const gameData = {
+    waitingOn,
+    answers: answerData,
+    phase: game.phase,
+    round: game.round,
+  }
+
+  return { gameData }  
+}
+
+module.exports = { games, createGame, updateAnswers }
