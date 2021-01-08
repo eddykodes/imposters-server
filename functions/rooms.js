@@ -19,6 +19,7 @@ const createRoom = (user) => {
     id: roomId,
     leader: newUser,
     started: false,
+    gameId: '',
     users: [],
   }
 
@@ -79,8 +80,14 @@ const getRoomData = (user) => {
 const setGame = (gameId, roomId) => {
   const roomIndex = rooms.findIndex(r => r.id === roomId)
   const roomData = rooms[roomIndex]
-  roomData.started = true
-  roomData.gameId = gameId
+  
+  if (gameId === null) {
+    roomData.started = false
+    roomData.gameId = ''
+  } else {
+    roomData.started = true
+    roomData.gameId = gameId
+  }
 }
 
 module.exports = { rooms, createRoom, confirmRoom, addUserToRoom, removeUserFromRoom, getRoomData, setGame }

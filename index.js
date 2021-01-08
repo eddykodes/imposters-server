@@ -118,6 +118,12 @@ io.on('connection', socket => {
           const { gameData } = getGameData(gameId)
           console.log('getGameData', { gameData })
           io.to(user.room).emit('gameData', { gameData })
+
+          if (gameData.phase === 5) {
+            setGame(null, user.room)
+            removeUserFromRoom(user)
+            socket.leave(user.room)
+          }
         }, 5000)
       }, 5000)
     }
