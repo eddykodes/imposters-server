@@ -19,13 +19,23 @@ app.use(router)
 app.set('view engine', 'ejs')
 app.use(cors())
 
-const { createUser } = require('./functions/users')
-const { createRoom, confirmRoom, addUserToRoom, getRoomData, setGame } = require('./functions/rooms')
+const { createUser, getUser } = require('./functions/users')
+const { createRoom, confirmRoom, addUserToRoom, removeUserFromRoom, getRoomData, setGame } = require('./functions/rooms')
 const { createGame, nextPhase, updateAnswers, updateVotes, getGameData } = require('./functions/games')
 
 io.on('connection', socket => { 
   console.log('new connection established')
-  
+
+  socket.on('disconnect', () => {
+    const user = getUser(socket.id)
+
+    if (!user.room)
+      return
+
+    const { users } = removeUserFromRoom(user)
+    io.to(user.room).emit('usersUpdate', { users })
+  })
+
   socket.on('createRoom', (user, callback) => {
     const { error, newUser } = createRoom(user)
 
@@ -53,10 +63,17 @@ io.on('connection', socket => {
     
     socket.join(room)
     const { users } = addUserToRoom(user)
-    io.to(room).emit('userJoin', { users })
+    io.to(room).emit('usersUpdate', { users })
 
     console.log(user.name, 'joined', room)
     callback({ room })
+  })
+
+  socket.on('leaveRoom', (user, callback) => {
+    const { users } = removeUserFromRoom(user)
+    socket.leave(user.room)
+    io.to(user.room).emit('usersUpdate', { users })
+    callback()
   })
 
   socket.on('getRoomData', (user, callback) => {

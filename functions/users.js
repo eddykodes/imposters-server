@@ -14,4 +14,8 @@ const createUser = (user) => {
   return { room: user.room }
 }
 
-module.exports = { users, createUser }
+const getUser = (id) => {
+  return users.find(user => user.id === id || user.prevId === id)
+}
+
+module.exports = { users, createUser, getUser }

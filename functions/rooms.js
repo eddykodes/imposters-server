@@ -48,6 +48,18 @@ const addUserToRoom = (user) => {
   return { users: roomData.users }
 }
 
+const removeUserFromRoom = (user) => {
+  const roomIndex = rooms.findIndex(r => r.id === user.room)
+  const roomData = rooms[roomIndex]
+
+  const userIndex = roomData.users.findIndex(u => u.id === user.id || u.id === user.prevId)
+
+  if (userIndex)
+    roomData.users.splice(userIndex, 1)
+
+  return { users: roomData.users }
+}
+
 const getRoomData = (user) => {
   const roomIndex = rooms.findIndex(r => r.id === user.room)
 
@@ -71,4 +83,4 @@ const setGame = (gameId, roomId) => {
   roomData.gameId = gameId
 }
 
-module.exports = { rooms, createRoom, confirmRoom, addUserToRoom, getRoomData, setGame }
+module.exports = { rooms, createRoom, confirmRoom, addUserToRoom, removeUserFromRoom, getRoomData, setGame }
