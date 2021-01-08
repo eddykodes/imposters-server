@@ -62,6 +62,17 @@ const nextPhase = (gameId) => {
   } else {
     game.phase = game.phase + 1
   }
+
+  const gameData = {
+    phase: game.phase,
+    round: game.round,
+    question: game.rounds[game.round-1].question,
+    target: game.rounds[game.round-1].target,
+    waitingOn: game.users
+  }
+
+  return { gameData }
+
 }
 
 const updateAnswers = (gameId, user, answer) => {
@@ -112,7 +123,7 @@ function updateVotes(gameId, user, vote) {
     vote,
   }
   roundVotes.push(voteEntry)
-  
+
   const votesData = []
 
   roundAnswers.forEach(answer => {
@@ -123,7 +134,8 @@ function updateVotes(gameId, user, vote) {
 
   let waitingOn
   if (roundVotes.length === game.users.length) {
-    waitingOn = game.users
+    waitingOn = []
+    calculateScores(game, votesData)
     nextPhase(gameId)
   } else {
     waitingOn = game.users.filter(user => {
@@ -146,4 +158,18 @@ function updateVotes(gameId, user, vote) {
   return { gameData }
 }
 
-module.exports = { games, createGame, updateAnswers, updateVotes }
+const calculateScores = (game, votesData) => {
+  votesData.forEach(vote => {
+    const userIndex = game.users.findIndex(user => user.name === vote.user.name)
+    game.users[userIndex].score = game.users[userIndex].score + vote.votes.length*5
+  })
+}
+
+const getScoresData = (gameId) => {
+  const game = getGame(gameId)
+  const scoresData = game.users
+
+  return scoresData 
+}
+
+module.exports = { games, createGame, nextPhase, updateAnswers, updateVotes, getScoresData }

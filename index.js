@@ -21,7 +21,7 @@ app.use(cors())
 
 const { createUser } = require('./functions/users')
 const { createRoom, confirmRoom, addUserToRoom, getRoomData, setGame } = require('./functions/rooms')
-const { createGame, updateAnswers, updateVotes } = require('./functions/games')
+const { createGame, nextPhase, updateAnswers, updateVotes, getScoresData } = require('./functions/games')
 
 io.on('connection', socket => { 
   console.log('new connection established')
@@ -88,6 +88,16 @@ io.on('connection', socket => {
     const { gameData } = updateVotes(gameId, user, vote)
     console.log('gameData sent', { gameData })
     io.to(user.room).emit('gameData', { gameData })
+
+    if (gameData.waitingOn.length === 0) {
+      setTimeout(() => {
+        const { gameData } = nextPhase(gameId)
+        const scoresData = getScoresData(gameId)
+        gameData.scoresData = scoresData
+        console.log('score gameData', { gameData })
+        io.to(user.room).emit('gameData', { gameData })
+      }, 5000)
+    }
   })
 })
 
