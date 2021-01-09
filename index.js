@@ -26,7 +26,7 @@ io.on('connection', socket => {
   socket.on('disconnect', () => {
     const user = getUser(socket.id)
 
-    if (!user.room)
+    if (user && !user.room)
       return
 
     const { users } = removeUserFromRoom(user)
