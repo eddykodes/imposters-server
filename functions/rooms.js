@@ -1,14 +1,8 @@
 const rooms = []
 
 const createRoom = (user) => {
-  const existingRoomIndex = rooms.findIndex(room => room.leader.id === user.id)
-  
-  if (existingRoomIndex > -1) {
-    rooms.splice(existingRoomIndex, 1)
-  }
-
-  let str = user.id
-  let roomId = str.replace(/_|-/gi, '')
+  const str = user.id
+  const roomId = str.replace(/_|-/gi, '')
 
   const newUser = {
     ...user,
@@ -17,14 +11,15 @@ const createRoom = (user) => {
 
   const room = {
     id: roomId,
-    leader: newUser,
+    leader: newUser.id,
     started: false,
     gameId: '',
-    users: [],
+    users: [newUser],
   }
 
   rooms.push(room)
-  return { newUser }
+  
+  return rooms.length-1
 }
 
 const confirmRoom = (room) => {
@@ -39,14 +34,24 @@ const confirmRoom = (room) => {
 
 const addUserToRoom = (user) => {
   const roomIndex = rooms.findIndex(r => r.id === user.room)
-  const roomData = rooms[roomIndex]
+  let roomData
 
-  const existingUser = roomData.users.find(u => u.id === user.id)
+  if (roomIndex === -1) {
+    createRoom(user)
+    roomData = rooms[rooms.length-1]
+  } else {
+    roomData = rooms[roomIndex]
 
-  if (!existingUser)
-    roomData.users.push(user)
+    const existingUser = roomData.users.find(u => u.id === user.id)
 
-  return { users: roomData.users }
+    if (!existingUser) {
+      roomData.users.push(user)
+    } else if ( existingUser && existingUser.id !== user.id) {
+      return { error: 'There is already someone by that name' }
+    }
+  }
+
+  return { roomData }
 }
 
 const removeUserFromRoom = (user) => {
