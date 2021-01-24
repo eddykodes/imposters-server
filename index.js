@@ -66,8 +66,13 @@ io.on('connection', socket => {
 
     if (error)
       return callback({ error })
-    
-    console.log('roomData retrieved by', user.name)
+
+    socket.join(roomData.id)
+    if (roomData.started) {
+      const { gameData } = getGameData(roomData.gameId)
+      console.log('gameData sent', {gameData})
+      io.to(roomData.id).emit('gameData', { gameData })
+    }
     callback({ roomData })
   })
 

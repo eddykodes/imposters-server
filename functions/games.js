@@ -157,17 +157,39 @@ const calculateScores = (game, votesData) => {
 
 const getGameData = (gameId) => {
   const game = getGame(gameId)
+  const roundData = game.rounds[game.round-1]
   const scoresData = game.users.sort((a, b) => b.score - a.score)
 
   const gameData = {
+    id: game.id,
     waitingOn: game.users,
     phase: game.phase,
     round: game.round,
-    question: game.rounds[game.round-1].question,
-    target: game.rounds[game.round-1].target,
+    question: roundData.question,
+    target: roundData.target,
     scores: scoresData
   }
 
+  if (roundData.answers.length < game.users.length || roundData.votes.length < game.users.length) {
+    const answersData = roundData.answers.map(answer => answer.answer)
+    gameData.answers = answersData
+  }
+
+  if (game.phase === 3) {
+    const roundVotes = roundData.votes
+    const roundAnswers = roundData.answers
+  
+    const votesData = []
+  
+    roundAnswers.forEach(answer => {
+      const votesArray = roundVotes.filter(vote => vote.vote === answer.id)
+      answer.votes = votesArray
+      votesData.push(answer)
+    })
+
+    gameData.votes = votesData
+  }
+  
   return { gameData }
 }
 
