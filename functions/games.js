@@ -12,10 +12,13 @@ const createGame = (users) => {
   let round = 1
   let phase = 1
 
+
+
   users.forEach((user, i) => {
     let roundEntry = { 
       question: questions[i],
       target: targets[i],
+      waitingOn: users.map(u => ({...u})),
       answers: [],
       votes: []
     }
@@ -38,7 +41,7 @@ const createGame = (users) => {
     rounds: users.length,
     target: targets[game.round-1],
     question: questions[game.round-1],
-    waitingOn: game.users,
+    waitingOn: users,
     round,
     phase
   }
@@ -62,12 +65,29 @@ const nextPhase = (gameId) => {
   } else {
     game.phase = game.phase + 1
   }
+}
 
+const updateWaitingOn = (gameId, userId, votesData) => {
+  const game = getGame(gameId)
+  const roundWaitingOn = game.rounds[game.round-1].waitingOn
+  const index = roundWaitingOn.findIndex(u => u.id === userId)
+  roundWaitingOn.splice(index, 1)
+
+  if (roundWaitingOn.length === 0) {
+    if (game.phase === 1) {
+      const resetUsers = game.users.map(user => ({...user}))
+      roundWaitingOn.push.apply(roundWaitingOn, resetUsers)
+    } else {
+      calculateScores(game, votesData)
+    }
+    nextPhase(game.id)
+  }
 }
 
 const updateAnswers = (gameId, user, answer) => {
   const game = getGame(gameId)
-  const roundAnswers = game.rounds[game.round-1].answers
+  const roundData = game.rounds[game.round-1]
+  const roundAnswers = roundData.answers
 
   const answerEntry = {
     id: roundAnswers.length,
@@ -78,23 +98,10 @@ const updateAnswers = (gameId, user, answer) => {
   
   const answersData = roundAnswers.map(answer => answer.answer)
 
-  let waitingOn
-  if (roundAnswers.length === game.users.length) {
-    waitingOn = game.users
-    nextPhase(gameId)
-  } else {
-    waitingOn = game.users.filter(user => {
-      let found = false
-      roundAnswers.forEach(answer => {
-        if (answer.user.name === user.name)
-          return found = true
-      })
-      return !found
-    })
-  }
+  updateWaitingOn(gameId, user.id)
   
   const gameData = {
-    waitingOn,
+    waitingOn: roundData.waitingOn,
     answers: answersData,
     phase: game.phase,
     round: game.round,
@@ -105,8 +112,9 @@ const updateAnswers = (gameId, user, answer) => {
 
 function updateVotes(gameId, user, vote) {
   const game = getGame(gameId)
-  const roundVotes = game.rounds[game.round-1].votes
-  const roundAnswers = game.rounds[game.round-1].answers
+  const roundData = game.rounds[game.round-1]
+  const roundVotes = roundData.votes
+  const roundAnswers = roundData.answers
 
   const voteEntry = {
     user,
@@ -122,24 +130,10 @@ function updateVotes(gameId, user, vote) {
     votesData.push(answer)
   })
 
-  let waitingOn
-  if (roundVotes.length === game.users.length) {
-    waitingOn = []
-    calculateScores(game, votesData)
-    nextPhase(gameId)
-  } else {
-    waitingOn = game.users.filter(user => {
-      let found = false
-      roundVotes.forEach(vote => {
-        if (vote.user.name === user.name)
-          return found = true
-      })
-      return !found
-    })
-  }
+  updateWaitingOn(gameId, user.id, votesData)
 
   const gameData = {
-    waitingOn,
+    waitingOn: roundData.waitingOn,
     votes: votesData,
     phase: game.phase,
     round: game.round,
@@ -162,9 +156,9 @@ const getGameData = (gameId) => {
 
   const gameData = {
     id: game.id,
-    waitingOn: game.users,
     phase: game.phase,
     round: game.round,
+    waitingOn: roundData.waitingOn,
     question: roundData.question,
     target: roundData.target,
     scores: scoresData
