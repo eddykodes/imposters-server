@@ -2,7 +2,8 @@ const app = require('express')()
 const server = require('http').createServer(app)
 const options = { 
   cors: {
-    origin: "*"
+    origin: '*',
+    methods: ['GET', 'POST']
   }
 }
 const io = require('socket.io')(server, options)
@@ -21,16 +22,16 @@ const { createRoom, confirmRoom, addUserToRoom, removeUserFromRoom, getRoomData,
 const { createGame, nextPhase, updateAnswers, updateVotes, getGameData } = require('./functions/games')
 
 io.on('connection', socket => { 
-  console.log('new connection established')
+  console.log('new connection established', socket.id)
 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', (reason) => {
+    console.log('disconnect', reason)
     const user = getUser(socket.id)
 
-    if (user && !user.room)
-      return
-
-    const { users } = removeUserFromRoom(user)
-    io.to(user.room).emit('usersUpdate', { users })
+    if (user && user.room) {
+      const { users } = removeUserFromRoom(user)
+      io.to(user.room).emit('usersUpdate', { users })
+    }
   })
 
   socket.on('createRoom', (user, callback) => {

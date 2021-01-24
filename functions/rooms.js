@@ -41,7 +41,7 @@ const addUserToRoom = (user) => {
   const roomIndex = rooms.findIndex(r => r.id === user.room)
   const roomData = rooms[roomIndex]
 
-  const existingUser = roomData.users.find(u => u.id === user.id || u.id === user.prevId)
+  const existingUser = roomData.users.find(u => u.id === user.id)
 
   if (!existingUser)
     roomData.users.push(user)
@@ -53,7 +53,10 @@ const removeUserFromRoom = (user) => {
   const roomIndex = rooms.findIndex(r => r.id === user.room)
   const roomData = rooms[roomIndex]
 
-  const userIndex = roomData.users.findIndex(u => u.id === user.id || u.id === user.prevId)
+  if (!roomData)
+    return { error: 'no room' }
+
+  const userIndex = roomData.users.findIndex(u => u.id === user.id)
 
   if (userIndex)
     roomData.users.splice(userIndex, 1)
@@ -69,7 +72,7 @@ const getRoomData = (user) => {
   
   const roomData = rooms[roomIndex]
 
-  const userIndex = roomData.users.findIndex(u => u.id === user.id || u.id === user.prevId)
+  const userIndex = roomData.users.findIndex(u => u.id === user.id)
   
   if (userIndex === -1) 
     return { error: 'You are trying to enter the wrong room'}
