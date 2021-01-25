@@ -19,13 +19,22 @@ app.use(cors())
 
 const { confirmRoom, addUserToRoom, removeUserFromRoom, getRoomData, setGame } = require('./functions/rooms')
 const { createGame, nextPhase, updateAnswers, updateVotes, getGameData } = require('./functions/games')
-const { createUser } = require('./functions/users')
+const { createUser, getUser, removeUser } = require('./functions/users')
 
 io.on('connection', socket => { 
   console.log('new connection established', socket.id)
 
   socket.on('disconnect', (reason) => {
     console.log('disconnect', reason)
+    const user = getUser(socket.id)
+    const { error, roomData } = getRoomData(user)
+    removeUser(user)
+
+    if (!error && roomData.started) 
+      return 
+
+    const { users } = removeUserFromRoom(user)
+    io.to(user.room).emit('usersUpdate', { users })
   })
 
   socket.on('confirmRoom', (room, callback) => {
