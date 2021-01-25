@@ -60,7 +60,12 @@ io.on('connection', socket => {
   })
 
   socket.on('leaveRoom', (user, callback) => {
-    const { users } = removeUserFromRoom(user)
+    const { error, users } = removeUserFromRoom(user)
+
+    if (error) 
+      console.log(error)
+      
+    removeUser(user)
     socket.leave(user.room)
     io.to(user.room).emit('usersUpdate', { users })
     callback()
@@ -115,11 +120,8 @@ io.on('connection', socket => {
           console.log('getGameData', { gameData })
           io.to(user.room).emit('gameData', { gameData })
 
-          if (gameData.phase === 5) {
+          if (gameData.phase === 5) 
             setGame(null, user.room)
-            removeUserFromRoom(user)
-            socket.leave(user.room)
-          }
         }, 5000)
       }, 5000)
     }

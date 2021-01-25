@@ -63,8 +63,13 @@ const removeUserFromRoom = (user) => {
 
   const userIndex = roomData.users.findIndex(u => u.id === user.id)
 
-  if (userIndex)
-    roomData.users.splice(userIndex, 1)
+  if (userIndex === -1)
+    return { error: 'no user exists'}
+    
+  roomData.users.splice(userIndex, 1)
+
+  if (roomData.users.length === 0)
+    rooms.splice(roomIndex, 1)
 
   return { users: roomData.users }
 }
